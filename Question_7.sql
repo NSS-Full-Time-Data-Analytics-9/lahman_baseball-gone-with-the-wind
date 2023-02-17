@@ -24,7 +24,7 @@ LIMIT 1;
 
 --PART(c) Doing this will probably result in an unusually small number of wins for a world series champion – determine why this is the case. Then redo your query, excluding the problem year.
 -- in 1981 there was a strike so i excluded year 1981.
-
+--ANS: Team SLN has smallest number of wins with 83 wins and also won world series.
 SELECT MIN(w) AS min_num_wins,teamid,yearid
 FROM public.teams
 WHERE wswin ILIKE '%Y%'
@@ -45,38 +45,17 @@ with max_team AS (SELECT yearid, MAX(w) AS max_wins -- Create CTE of each team w
 					GROUP BY yearid
 				  	ORDER BY yearid)
 SELECT SUM(CASE WHEN t.wswin = 'Y' THEN 1 ELSE 0 END) AS max_champ, -- Count of max win champs
-     --((SUM(CASE WHEN t.wswin = 'Y' THEN 1 ELSE 0 END))::numeric/COUNT(*)::numeric)*100 AS percent_max_champ
-		AVG(CASE WHEN t.wswin = 'Y' THEN 1 ELSE 0 END)*100 AS percent_max_is_champ -- % max win team is champ
+     ((SUM(CASE WHEN t.wswin = 'Y' THEN 1 ELSE 0 END))::numeric/COUNT(*)::numeric)*100 AS percent_max_champ
+		--AVG(CASE WHEN t.wswin = 'Y' THEN 1 ELSE 0 END)*100 AS percent_max_is_champ -- % max win team is champ
 FROM max_team AS wt
 INNER JOIN teams AS t 
-ON wt.yearid = t.yearid and wt.max_wins = t.w
+ON wt.yearid = t.yearid and wt.max_wins = t.w;
 
 
 
 
 
-SELECT
-	DISTINCT yearid,
-	name,
-	wswin,
-	wins,
-	mostwins
-FROM(
-	SELECT
-		DISTINCT yearid,
-		name,
-		wswin,
-		w AS wins,
-		MAX(w) OVER(PARTITION BY yearid) AS mostwins
-	FROM teams
-	WHERE yearid >= 1970
-	ORDER BY yearid DESC) AS subquery
-WHERE wswin LIKE 'Y'
-	AND wins = mostwins
-ORDER BY yearid DESC;
 
 
 
 
-SELECT *
-FROM teams
